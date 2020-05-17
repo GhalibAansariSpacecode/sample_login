@@ -6,7 +6,6 @@ const {guard} = require("../helper/Auth");
 const AES = require('crypto-js/aes');
 const {Constant} = require('../constant');
 
-let users = [];
 const {passwordRegex, emailRegex} = Constant;
 
 //init router instance.
@@ -31,7 +30,7 @@ let userRegistration = (req, res) => {
             if (err) { res.status(400).json({status: 400, success: false, message: err.details[0].message}) }
             else {
                 let data = await new userModel(newData).save().catch((err) => {   //user saved in database
-                    return res.status(400).json({status: 400, success: false, message: err["errmsg"]})
+                    return res.status(400).json({status: 400, success: false, message: err["errmsg"] || err['message']})
                 });
                 res.status(200).json({
                     status: 200, success: true, message: "Registration Successful. Please login.",
@@ -39,7 +38,7 @@ let userRegistration = (req, res) => {
             }
         })
     } catch (err) {
-        res.status(400).json({status: 400, success: false, message: err.message,})
+        res.status(400).json({status: 400, success: false, message: err["errmsg"] || err['message']})
     }
 };
 
@@ -51,30 +50,31 @@ let userRegistration = (req, res) => {
  */
 let addUser = (req, res) => {
     const schema = Joi.object().keys({
-        name: Joi.string().required(),
+        first_name: Joi.string().required(),
+        last_name: Joi.string().required(),
         email: Joi.string().required().email({minDomainAtoms: 2}).regex(emailRegex),
         password: Joi.string().required().regex(passwordRegex).label('Password should have 8 digit and alphanumeric.'),
-        salary: Joi.number().required(),
-        loggedInUser: Joi.any()
+        address_id: Joi.string().required(),
+        salt: Joi.string().required(),
+        role_id: Joi.string().required(),
+        loggedInUser: Joi.any().required(),
     });
-    const newData = req.body;
+    const newData = req["body"];
     try {
         Joi.validate(newData, schema, async (err, value) => {
             if (err) { res.status(400).json({status: 400, success: false, message: err.details[0].message}) }
             else {
-                await new userModel(newData).save()
-                .then((datax) => {
-                    res.status(200).json({
-                        status: 200, success: true, message: "User Created Sucessfully.", data: {...datax._doc}
-                    })
-                })
-                .catch((err) => {   //user saved in database
-                    return res.status(400).json({status: 400, success: false, message: err.errmsg || err})
+                newData.createdBy = req["body"].loggedInUser._id;
+                let data = await new userModel(newData).save().catch((err) => {   //user saved in database
+                    return res.status(400).json({status: 400, success: false, message: err["errmsg"] || err['message']})
                 });
+                res.status(200).json({
+                    status: 200, success: true, message: "User Successfully Added.",
+                })
             }
         })
     } catch (err) {
-        res.status(400).json({status: 400, success: false, message: err.message,})
+        res.status(400).json({status: 400, success: false, message: err["errmsg"] || err['message']})
     }
 };
 
@@ -131,7 +131,7 @@ function daysInSeconds(days) {
 //all sub-route's.
 router.post('/registration', userRegistration);
 router.post('/login', userLogin);
-// router.post('/adduser', guard, addUser);
+router.post('/add', guard, addUser);
 
 
 exports.userRouter = router;

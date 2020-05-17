@@ -13,7 +13,7 @@ const router = Router();
 let addAddress = (req, res) => {
     const schema = Joi.object().keys({
         address1: Joi.string().required(),
-        address2: Joi.string().required(),
+        address2: Joi.string(),
         city: Joi.string().required(),
         country: Joi.string().required(),
         pin_zip: Joi.string().required(),
@@ -41,7 +41,7 @@ let updateAddress = (req, res) => {
     const schema = Joi.object().keys({
         id: Joi.string().required(),
         address1: Joi.string().required(),
-        address2: Joi.string().required(),
+        address2: Joi.string(),
         city: Joi.string().required(),
         country: Joi.string().required(),
         pin_zip: Joi.string().required(),

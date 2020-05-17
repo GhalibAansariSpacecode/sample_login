@@ -7,8 +7,8 @@ const {Schema} = require('mongoose');
 const roleSchema = new Schema({
     name: {type: String, required: true},
     description: {type: String, required: true},
-    role_type_id: { required: false, type: Schema.Types.ObjectId, ref: 'role_type' },
-    model_ids: { required: false, type: Schema.Types.ObjectId, ref: 'model' },
+    role_type_id: { type: Schema.Types.ObjectId, ref: 'role_type' },
+    model_ids: { type: Schema.Types.ObjectId, ref: 'model' },
     createdBy: { required: true, type: Schema.Types.ObjectId, ref: 'User' },
     modifiedBy: { required: true, type: Schema.Types.ObjectId, ref: 'User' },
 }, { timestamps: { createdAt: 'createdDate', updatedAt: 'modifiedDate' } });
